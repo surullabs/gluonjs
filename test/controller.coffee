@@ -2,8 +2,16 @@
 # This file is licensed under the MIT License
 
 readline = require("readline")
+events = require("events")
 
-send =  (obj) -> process.stdout.write(JSON.stringify(obj) + "\n")
+readResponses = {}
+
+objId = 0
+
+send = (obj, cb) ->
+  obj["id"] = objId++
+  process.stdout.write(JSON.stringify(obj) + "\n")
+  readResponses[obj["id"]] = (event) => cb?(event)
 
 errorsExists = false
 
@@ -15,17 +23,22 @@ deferredFinish = false
 
 finish = () ->
   if not errorsExists
-    send({"id": 10000, "name": "test-done", "type": "emit"})
+    send({"name": "test-done", "type": "emit"})
   else
-    send({"id": 10001, "name": "test-failed", "type": "emit"})
+    send({"name": "test-failed", "type": "emit"})
 
-readResponses = {}
+
+notifications = []
 
 read = (cmd) ->
   try
     event = JSON.parse(cmd)
   catch e
     return fail("Error parsing command ", cmd, ":", e)
+
+  if event["type"]? and event["type"] == "notify"
+    notifications.push(event)
+    return
 
   id = event["id"]
   if not id?
@@ -37,47 +50,70 @@ read = (cmd) ->
 
   response(event)
 
+check = (e) ->
+  if e["type"] == "ok"
+    return {send: send, finish: finish}
+  else
+    fail(e["msg"])
+    return {send: (args...) -> finish()
+            finish: finish}
+
 # All tests
 testArgUpdate = () ->
-  send({"id": 1, "name": "test", "type": "add", "script": "function(ctx, arg) {ctx.testVar = arg;}"})
-  send({"id": 2, "name": "test", "arg": 5, "type": "call"})
-  send({"id": 3, "name": "check-test-var", "type": "emit"})
+  send({"name": "test", "type": "add", "script": "function(g, ctx, arg) {ctx.testVar = arg;}"},
+    (event) ->
+      check(event).send({"name": "test", "arg": 5, "type": "call"},
+      (event) -> check(event).finish()))
 
 testModuleAccess = () ->
   script = "
-    function(ctx, arg) {
+    function(g, ctx, arg) {
       assert = require('assert');
       assert.ok(true);
       ctx.testVar = arg;
     }
   "
-  send({"id": 1, "name": "test", "type": "add", "script": script})
-  send({"id": 2, "name": "test", "arg": 6, "type": "call"})
-  send({"id": 3, "name": "check-test-var", "type": "emit"})
+  send({"name": "test", "type": "add", "script": script},
+    (event) -> check(event).send({"name": "test", "arg": 6, "type": "call"}, (e) -> check(e).finish()))
 
 testReturnArguments = () ->
-  # The test will finish once we receive a response from the parent and so the final signal
-  # must be sent asynchronously
-  deferredFinish = true
-  send({"id": 1, "name": "test", "type": "add", "script": "function (ctx, arg) { return arg; }"})
+  send({"name": "test", "type": "add", "script": "function (g, ctx, arg) { return arg; }"},
+    (e) -> check(e).send({"name": "test", "arg": 7, "type": "call"},
+      (event) ->
+        check(event)
+        if event.msg != 7
+          fail("received incorrect response ", event)
+        finish()
+    ))
 
-  # Set up a callback to handle the function response. This finishes the test as well.
-  readResponses[2] = (event) ->
-    if event.msg != 7
-      fail("received incorrect response ", event)
-    finish()
+testNotify = () ->
+  send({"name": "test", "type": "add", "script": "
+    function (notify, ctx, arg) {
+      notify('test-notification', arg);
+    }
+  "},
+    (e) -> check(e).send({"name": "test", "arg": 20, "type": "call"},
+      (event) ->
+        check(event)
+        if notifications.length == 1
+          n = notifications[0]
 
-  send({"id": 2, "name": "test", "arg": 7, "type": "call"})
+        if not n?
+          fail("no notification received")
+        else if n.arg != 20 or n.name != "test-notification"
+          fail("incorrect notification received", n)
 
+        finish()))
 
 tests = {
   "Test Argument Update": (a...) -> testArgUpdate(a...),
   "Test Module Access": (a...) -> testModuleAccess(a...),
   "Test Return Arguments": (a...) -> testReturnArguments(a...)
+  "Test Notify": (a...) -> testNotify(a...)
 }
 
 main = (testName) ->
-  # Start reading input
+# Start reading input
   rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -93,10 +129,6 @@ main = (testName) ->
     return fail("no such test ", testName)
 
   test()
-
-  # Finish the test
-  if not deferredFinish
-    finish()
 
 # Run all tests
 main(process.env["GLUONJS_TEST"])

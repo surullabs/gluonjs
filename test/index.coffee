@@ -30,12 +30,17 @@ describe 'Gluon', ->
     gluon1?.stop()
 
   it 'Test Argument Update', (done) ->
-    gluon1.on("check-test-var", => ctx.testVar.should.equal 5)
-    gluon1.on("test-done", => done())
+    gluon1.on("test-done", =>
+      ctx.testVar.should.equal 5
+      done())
 
   it 'Test Module Access', (done) ->
-    gluon1.on("check-test-var", => ctx.testVar.should.equal 6)
-    gluon1.on("test-done", => done())
+    gluon1.on("test-done", =>
+      ctx.testVar.should.equal 6
+      done())
 
   it 'Test Return Arguments', (done) ->
+    gluon1.on("test-done", => done())
+
+  it 'Test Notify', (done) ->
     gluon1.on("test-done", => done())

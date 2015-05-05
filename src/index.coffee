@@ -60,8 +60,8 @@ class Gluon extends events.EventEmitter
 
     if err?
       @sendError(event["id"], err)
-    else if out?
-      @send({"id": event["id"], "type": "result", "msg": out})
+    else
+      @send({"id": event["id"], "type": "ok", "msg": out})
 
   call: (name, arg) ->
     fn = @scripts[name]
@@ -90,7 +90,8 @@ class Gluon extends events.EventEmitter
     try
       @ctx[name] = null
       fn = eval("(" + script + ")")
-      @scripts[name] = (args...) => fn(@ctx, args...)
+      notify = (name, arg) => @notify(name, arg)
+      @scripts[name] = (args...) => fn(notify, @ctx, args...)
     catch e
       return "invalid script: #{e}"
 
@@ -98,6 +99,9 @@ class Gluon extends events.EventEmitter
 
   sendError: (id, obj) ->
     @send({"type": "error", "id": id, "msg": obj})
+
+  notify: (name, arg) ->
+    @send({"type": "notify", "name": name, "arg": arg})
 
   send: (obj) ->
     @proc.stdin.write(JSON.stringify(obj) + "\n")
