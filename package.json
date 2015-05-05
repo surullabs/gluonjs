@@ -1,0 +1,30 @@
+{
+  "name": "gluonjs",
+  "version": "0.1.0",
+  "description": "A library to control electron using an external process",
+  "private": true,
+  "main": "lib/index.js",
+  "scripts": {},
+  "dependencies": {
+    "stream-splitter": "^0.3.2"
+  },
+  "devDependencies": {
+    "chai": "^2.3.0",
+    "mocha": "^2.2.4",
+    "readline": "0.0.7"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/surullabs/gluonjs.git"
+  },
+  "keywords": [
+    "electron",
+    "atom-shell",
+    "process"
+  ],
+  "author": "Sridhar Venkatakrishnan <s@surul.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/surullabs/gluonjs/issues"
+  }
+}
