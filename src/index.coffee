@@ -43,7 +43,7 @@ class Gluon extends events.EventEmitter
     try
       event = JSON.parse(token)
     catch e
-      @debug("Invalid JSON:", token)
+      console.error(token)
       @sendError(null, "invalid json: #{e}")
       return
 
