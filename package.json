@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "chai": "^2.3.0",
-    "mocha": "^2.2.4",
-    "readline": "0.0.7"
+    "coffee-script": "^1.9.2",
+    "mocha": "^2.2.4"
   },
   "repository": {
     "type": "git",

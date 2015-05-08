@@ -104,7 +104,12 @@ class Gluon extends events.EventEmitter
     @send({"type": "notify", "name": name, "arg": arg})
 
   send: (obj) ->
-    @proc.stdin.write(JSON.stringify(obj) + "\n")
+    try
+      str = JSON.stringify(obj)
+    catch e
+      console.error "failed to serialize", obj, e.stack
+      throw e
+    @proc.stdin.write(str + "\n")
 
   debug: (objs...) ->
     if @debugEnabled
