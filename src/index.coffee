@@ -72,7 +72,8 @@ class Gluon extends events.EventEmitter
       result = fn(arg)
       return [result, null]
     catch e
-      return [null, e]
+      console.error e.stack
+      return [null, e.message]
 
 
   emitEvent: (name) ->

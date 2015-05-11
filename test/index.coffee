@@ -44,3 +44,6 @@ describe 'Gluon', ->
 
   it 'Test Notify', (done) ->
     gluon1.on("test-done", => done())
+
+  it 'Test Call Error', (done) ->
+    gluon1.on("test-done", => done())

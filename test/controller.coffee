@@ -19,8 +19,6 @@ fail = (args...) ->
   console.error(args...)
   errorsExists = true
 
-deferredFinish = false
-
 finish = () ->
   if not errorsExists
     send({"name": "test-done", "type": "emit"})
@@ -105,11 +103,23 @@ testNotify = () ->
 
         finish()))
 
+testCallError = () ->
+  send({"name": "test", "type": "add", "script": "function(g, ctx, arg) {throw new Error('This is an error');}"},
+    (event) ->
+      check(event).send({"name": "test", "arg": 5, "type": "call"},
+        (event) ->
+          if event["type"] != "error"
+            fail("Expected error but received", event)
+          if event["msg"] != 'This is an error'
+            fail("Expected error but received", event)
+          finish()))
+
 tests = {
   "Test Argument Update": (a...) -> testArgUpdate(a...),
   "Test Module Access": (a...) -> testModuleAccess(a...),
   "Test Return Arguments": (a...) -> testReturnArguments(a...)
   "Test Notify": (a...) -> testNotify(a...)
+  "Test Call Error": (a...) -> testCallError(a...)
 }
 
 main = (testName) ->
