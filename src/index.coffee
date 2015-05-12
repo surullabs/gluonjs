@@ -71,6 +71,8 @@ class Gluon extends events.EventEmitter
           out = @attr(event["obj"], event["name"], event["save"])
         when "fn"
           out = @fn(event["obj"], event["name"], event["save"], event["arg"], event["new"])
+        when "free"
+          @free(event["obj"])
         when "call"
           out = @call(event["name"], event["arg"])
         when "emit"
@@ -81,6 +83,9 @@ class Gluon extends events.EventEmitter
       @send({"id": id, "type": "ok", "msg": out})
     catch e
       @sendError(id, e)
+
+  free: (objRef) ->
+    delete @ctx[objRef]
 
   saveOrReturn: (save, result) ->
     if save? == "void"
