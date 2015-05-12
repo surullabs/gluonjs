@@ -47,3 +47,17 @@ describe 'Gluon', ->
 
   it 'Test Call Error', (done) ->
     gluon1.on("test-done", => done())
+
+  it 'Test Globals', () ->
+    ctx.process.should.exist
+    ctx.global.should.exist
+    ctx.console.should.exist
+    ctx.module.should.exist
+    ctx.__dirname.should.exist
+    ctx.__filename.should.exist
+
+  it 'Test Attrs', (done) ->
+    gluon1.on("test-done", => done())
+
+  it 'Test Function Calls', (done) ->
+    gluon1.on("test-done", => done())
