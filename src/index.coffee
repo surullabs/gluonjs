@@ -10,13 +10,10 @@ child_process = require "child_process"
 StreamSplitter = require "stream-splitter"
 events = require "events"
 
-class GluonError extends Error
-  constructor: (@message) ->
-
 getProp = (source, objName) ->
   obj = source[objName]
   if not obj?
-    throw new GluonError("#{objName} not found")
+    throw new Error("#{objName} not found")
   return obj
 
 class Gluon extends events.EventEmitter
@@ -79,7 +76,7 @@ class Gluon extends events.EventEmitter
         when "emit"
           @emitEvent(event["name"])
         else
-          throw new GluonError("message type unknown: #{type}")
+          throw new Error("message type unknown: #{type}")
 
       @send({"id": id, "type": "ok", "msg": out})
     catch e
@@ -152,20 +149,20 @@ class Gluon extends events.EventEmitter
   call: (name, arg) ->
     fn = @scripts[name]
     if not fn?
-      throw new GluonError("no such function #{name}")
+      throw new Error("no such function #{name}")
     result = fn(arg)
 
   emitEvent: (name) ->
     if not name?
-      throw new GluonError("no event provided to emit")
+      throw new Error("no event provided to emit")
     @emit(name)
     return null
 
   add: (name, script) ->
     if not name?
-      throw new GluonError("script name absent")
+      throw new Error("script name absent")
     else if name of @scripts
-      throw new GluonError("script #{name} exists")
+      throw new Error("script #{name} exists")
 
     try
       @ctx[name] = null
@@ -173,7 +170,7 @@ class Gluon extends events.EventEmitter
       notify = (name, arg) => @notify(name, arg)
       @scripts[name] = (args...) => fn(notify, @ctx, args...)
     catch e
-      throw new GluonError("invalid script: #{e}")
+      throw new Error("invalid script: #{e}")
 
     @debug("Added script: #{name}")
 
