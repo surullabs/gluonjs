@@ -57,6 +57,11 @@ class Gluon extends events.EventEmitter
     @proc.kill()
 
   read: (token) ->
+    if token.charAt(0) != '{'
+      process.stdout.write(token)
+      process.stdout.write('\n')
+      return
+
     id = null
     try
       event = JSON.parse(token)
