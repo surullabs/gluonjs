@@ -109,7 +109,7 @@ class Gluon extends events.EventEmitter
         rest = callbackRef.slice(1)
 
         if args.length != rest.length
-          @sendError(null, "expected " + rest.length + " args but received " + args.length + " for " + callbackRef[0])
+          @sendError(null, "in callback expected " + rest.length + " args but received " + args.length + " for " + callbackRef[0])
           return
 
         for arg, i in rest
