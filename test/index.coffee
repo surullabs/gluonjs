@@ -64,3 +64,6 @@ describe 'Gluon', ->
 
   it 'Test Direct Call', (done) ->
     gluon1.on("test-done", => done())
+
+  it 'Test Deep Ref', (done) ->
+    gluon1.on("test-done", => done())

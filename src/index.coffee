@@ -13,9 +13,14 @@ events = require "events"
 getProp = (source, objName) ->
   if not objName? or objName == ""
     return source
-  obj = source[objName]
-  if not obj?
-    throw new Error("#{objName} not found")
+  parts = objName.split(".")
+  obj = source
+  for i, part of parts
+    if part == ""
+      throw new Error("invalid object name " + objName)
+    obj = obj[part]
+    if not obj?
+      throw new Error("#{objName} (#{part}) not found")
   return obj
 
 class Gluon extends events.EventEmitter

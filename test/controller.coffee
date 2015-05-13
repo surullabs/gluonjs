@@ -198,6 +198,13 @@ testDirectCall = () ->
             check(event)
             finish()))))
 
+testDeepRef = () ->
+  send({"type": "attr", "obj": "process.versions", "name": "node"},
+    (event) ->
+      check(event, process.versions.node)
+      finish())
+
+
 tests = {
   "Test Argument Update": (a...) -> testArgUpdate(a...),
   "Test Module Access": (a...) -> testModuleAccess(a...),
@@ -207,6 +214,7 @@ tests = {
   "Test Attrs": (a...) -> testAttrs(a...)
   "Test Function Calls": (a...) -> testFunctionCalls(a...)
   "Test Direct Call": (a...) -> testDirectCall(a...)
+  "Test Deep Ref": (a...) -> testDeepRef(a...)
 }
 
 main = (testName) ->
