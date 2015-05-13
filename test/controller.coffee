@@ -189,6 +189,15 @@ testArgLessFn = () ->
 
 testFunctionCalls = () -> testArgLessFn()
 
+testDirectCall = () ->
+  send(fn("module", "require", [["buffer"]], "buffer"),
+    (event) -> check(event).send({"type": "attr", "obj": "buffer", "name": "Buffer", "save": "Buffer"},
+      (event) -> check(event).send(ctor("Buffer", "", [["contents"]], "buf1"),
+        (event) -> check(event).send(fn("buf1", "toString", [], null),
+          (event) ->
+            check(event)
+            finish()))))
+
 tests = {
   "Test Argument Update": (a...) -> testArgUpdate(a...),
   "Test Module Access": (a...) -> testModuleAccess(a...),
@@ -197,6 +206,7 @@ tests = {
   "Test Call Error": (a...) -> testCallError(a...)
   "Test Attrs": (a...) -> testAttrs(a...)
   "Test Function Calls": (a...) -> testFunctionCalls(a...)
+  "Test Direct Call": (a...) -> testDirectCall(a...)
 }
 
 main = (testName) ->

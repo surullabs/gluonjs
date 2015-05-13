@@ -11,6 +11,8 @@ StreamSplitter = require "stream-splitter"
 events = require "events"
 
 getProp = (source, objName) ->
+  if not objName? or objName == ""
+    return source
   obj = source[objName]
   if not obj?
     throw new Error("#{objName} not found")
@@ -143,6 +145,7 @@ class Gluon extends events.EventEmitter
       for arg in args
         filtered.push(@makeArg(arg...))
     if isConstructor? and isConstructor
+      filtered = [f].concat(filtered)
       result = new (Function.prototype.bind.apply(f, filtered))
     else
       result = f.apply(obj, filtered)

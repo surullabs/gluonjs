@@ -61,3 +61,6 @@ describe 'Gluon', ->
 
   it 'Test Function Calls', (done) ->
     gluon1.on("test-done", => done())
+
+  it 'Test Direct Call', (done) ->
+    gluon1.on("test-done", => done())
